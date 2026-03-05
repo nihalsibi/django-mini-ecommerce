@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Mini Shop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="category-strip home-category-strip" aria-label="Product categories">
+        <a href="{% url 'products:product_list' %}" class="category-chip">All</a>
+        {% for category in categories %}
+            <a href="{% url 'products:product_list' %}?category={{ category.slug }}" class="category-chip">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+
+<section class="home-hero">
+    <div class="container">
+        <h1>Welcome to Mini Shop</h1>
+        <p>Your one-stop place for great products at great prices.</p>
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary browse-products-btn">Browse Products</a>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <h2>Why Shop With Us</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Fast Delivery</h3>
+                <p>Quick and reliable shipping on all orders.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Best Prices</h3>
+                <p>Competitive prices and regular deals.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Quality Products</h3>
+                <p>Curated selection of trusted brands.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mini Shop{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="{% url 'core:home' %}" class="logo">Mini Shop</a>
+            <div class="nav-mobile-actions">
+                <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <button type="button" class="nav-mobile-search" aria-label="Search products">
+                    <svg class="nav-mobile-search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
+                        <path d="M16 16L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                    </svg>
+                </button>
+            </div>
+            <nav class="main-nav" id="site-nav">
+                <form action="{% url 'products:product_list' %}" method="get" class="nav-search-form" role="search">
+                    <input type="search" name="q" class="nav-search-input" placeholder="Search " value="{{ request.GET.q|default:'' }}" aria-label="Search">
+                    <button type="submit" class="nav-search-submit" aria-label="Search">
+                        <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
+                            <path d="M16 16L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                        </svg>
+                        
+                    </button>
+                </form>
+                <a href="{% url 'core:home' %}">Home</a>
+                <a href="{% url 'products:product_list' %}">Products</a>
+                <a href="{% url 'cart:cart' %}" class="cart-link">
+                    <svg class="cart-icon{% if cart_bounce %} cart-icon-bounce{% endif %}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3 4H5L6.4 14.5C6.5 15.1 7 15.6 7.6 15.6H18.3C18.9 15.6 19.4 15.2 19.6 14.6L21 8H7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="9" cy="19" r="1.4" fill="currentColor"/>
+                        <circle cx="18" cy="19" r="1.4" fill="currentColor"/>
+                    </svg>
+                    <span>Cart{% if cart_item_count %} ({{ cart_item_count }}){% endif %}</span>
+                </a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:account' %}">Account</a>
+                    {% if user.is_staff %}
+                        <a href="{% url 'admin:index' %}">Admin</a>
+                    {% endif %}
+                    <form action="{% url 'accounts:logout' %}" method="post" class="nav-logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-logout-btn">Log Out</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">Log In</a>
+                    <a href="{% url 'accounts:signup' %}">Sign Up</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; {% now "Y" %} Mini Shop. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            const header = document.querySelector(".site-header");
+            if (!header) return;
+
+            let lastScrollY = window.scrollY;
+            let ticking = false;
+            const threshold = 8;
+
+            function updateNavbarVisibility() {
+                const currentScrollY = window.scrollY;
+                const delta = currentScrollY - lastScrollY;
+
+                if (Math.abs(delta) < threshold) {
+                    return;
+                }
+
+                if (currentScrollY <= 10) {
+                    header.classList.remove("nav-hidden");
+                    lastScrollY = currentScrollY;
+                    return;
+                }
+
+                if (delta > 0) {
+                    header.classList.add("nav-hidden");
+                } else {
+                    header.classList.remove("nav-hidden");
+                }
+
+                lastScrollY = currentScrollY;
+            }
+
+            window.addEventListener(
+                "scroll",
+                function () {
+                    if (ticking) return;
+
+                    ticking = true;
+                    window.requestAnimationFrame(function () {
+                        updateNavbarVisibility();
+                        ticking = false;
+                    });
+                },
+                { passive: true }
+            );
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const header = document.querySelector(".site-header");
+            const navToggle = document.querySelector(".nav-toggle");
+            const mobileSearchButton = document.querySelector(".nav-mobile-search");
+            const nav = document.getElementById("site-nav");
+            const navSearchForm = document.querySelector(".nav-search-form");
+            const navSearchInput = navSearchForm ? navSearchForm.querySelector(".nav-search-input") : null;
+            if (!header || !navToggle || !nav) return;
+
+            navToggle.addEventListener("click", function () {
+                const isExpanded = navToggle.getAttribute("aria-expanded") === "true";
+                navToggle.setAttribute("aria-expanded", String(!isExpanded));
+                header.classList.toggle("nav-open", !isExpanded);
+            });
+
+            if (mobileSearchButton && navSearchForm && navSearchInput) {
+                mobileSearchButton.addEventListener("click", function () {
+                    if (window.innerWidth > 768) return;
+
+                    const isOpen = header.classList.contains("nav-open");
+                    if (!isOpen) {
+                        header.classList.add("nav-open");
+                        navToggle.setAttribute("aria-expanded", "true");
+                        window.setTimeout(function () {
+                            navSearchInput.focus();
+                        }, 30);
+                        return;
+                    }
+
+                    navSearchForm.requestSubmit();
+                });
+            }
+
+            nav.addEventListener("click", function (event) {
+                if (!event.target.closest("a")) return;
+                if (window.innerWidth > 768) return;
+
+                header.classList.remove("nav-open");
+                navToggle.setAttribute("aria-expanded", "false");
+            });
+
+            window.addEventListener("resize", function () {
+                if (window.innerWidth > 768) {
+                    header.classList.remove("nav-open");
+                    navToggle.setAttribute("aria-expanded", "false");
+                }
+            });
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const transitionDurationMs = 220;
+
+            document.addEventListener(
+                "click",
+                function (event) {
+                    const link = event.target.closest("a");
+                    if (!link) return;
+                    if (event.defaultPrevented || event.button !== 0) return;
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                    if (link.target && link.target !== "_self") return;
+                    if (link.hasAttribute("download")) return;
+
+                    const href = link.getAttribute("href");
+                    if (!href) return;
+                    if (
+                        href.startsWith("#") ||
+                        href.startsWith("mailto:") ||
+                        href.startsWith("tel:") ||
+                        href.startsWith("javascript:")
+                    ) {
+                        return;
+                    }
+
+                    const destination = new URL(link.href, window.location.href);
+                    if (destination.origin !== window.location.origin) return;
+                    if (destination.href === window.location.href) return;
+
+                    event.preventDefault();
+                    document.body.classList.add("page-leaving");
+                    window.setTimeout(function () {
+                        window.location.href = destination.href;
+                    }, transitionDurationMs);
+                },
+                true
+            );
+
+            window.addEventListener("pageshow", function () {
+                document.body.classList.remove("page-leaving");
+            });
+        })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

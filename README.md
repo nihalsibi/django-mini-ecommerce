@@ -83,6 +83,14 @@ python manage.py runserver
 
 Open `http://127.0.0.1:8000/`.
 
+## Demo Data
+
+The project automatically seeds demo categories and products during migration.
+
+No manual setup is required to see products.
+
+
+
 ## Main Routes
 
 - `/` home page
@@ -108,3 +116,4 @@ python manage.py migrate
 - `DEBUG=True` and a development `SECRET_KEY` are currently set in `config/settings.py`.
 - Static files are served from `static/` during development.
 - Media uploads are stored in `media/` and served in debug mode.
+

@@ -45,3 +45,30 @@ htmlcov/
 # OS files
 .DS_Store
 Thumbs.db
+__MACOSX__/
+
+# Logs
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Local development files
+.env.local
+local_settings.py
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+*~
+.#*
+
+# Node modules (if using npm)
+node_modules/
+package-lock.json
+yarn.lock
+
+# IDE temporary files
+*.sublime-workspace
+*.sublime-project
+*.iml
